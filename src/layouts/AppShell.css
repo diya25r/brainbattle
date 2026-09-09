@@ -3,10 +3,6 @@
   place-items: center; overflow: hidden;
   background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, .12), transparent 36%), var(--bb-bg);
 }
-.app-shell__content { position: relative; z-index: 1; text-align: center; }
-.app-shell__brand { margin: 0; font-family: 'Space Grotesk', ui-sans-serif, sans-serif; font-size: clamp(2rem, 7vw, 4.5rem); font-weight: 700; letter-spacing: -.07em; }
-.app-shell__brand span { margin-left: .15em; background: var(--bb-gradient); background-clip: text; color: transparent; }
-.app-shell__status { margin: 1rem 0 0; color: var(--bb-muted); font-size: .95rem; }
 .app-shell__glow { position: absolute; z-index: -1; width: 28rem; height: 28rem; border-radius: 50%; filter: blur(90px); opacity: .18; }
 .app-shell__glow--violet { top: -14rem; left: -10rem; background: var(--bb-violet); }
 .app-shell__glow--pink { right: -12rem; bottom: -16rem; background: var(--bb-pink); }
