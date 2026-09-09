@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AuthField from '../components/AuthField.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import './AuthPage.css'
@@ -18,12 +19,13 @@ function getErrors(mode, values) {
   return errors
 }
 
-function AuthPage({ mode, onModeChange }) {
+function AuthPage({ mode }) {
   const [values, setValues] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState({})
   const [notice, setNotice] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { login, register } = useAuth()
+  const navigate = useNavigate()
   const isLogin = mode === 'login'
 
   function handleChange(event) {
@@ -54,7 +56,7 @@ function AuthPage({ mode, onModeChange }) {
     setValues({ name: '', email: '', password: '', confirmPassword: '' })
     setErrors({})
     setNotice('')
-    onModeChange(nextMode)
+    navigate(nextMode === 'signup' ? '/signup' : '/login')
   }
 
   return (

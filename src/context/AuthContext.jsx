@@ -1,5 +1,5 @@
-import { createContext, useContext, useState } from 'react'
-import { loginUser, registerUser } from '../services/authService.js'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { getUserProfile, loginUser, registerUser } from '../services/authService.js'
 
 const AuthContext = createContext(null)
 const storageKey = 'brainbattle-auth'
@@ -14,12 +14,33 @@ function readStoredAuth() {
 
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(readStoredAuth)
+  const [profileLoading, setProfileLoading] = useState(Boolean(auth.token))
+  const [profileError, setProfileError] = useState(false)
 
   function saveAuth(data) {
     const nextAuth = { user: data.user, token: data.token }
     localStorage.setItem(storageKey, JSON.stringify(nextAuth))
     setAuth(nextAuth)
   }
+
+  async function refreshProfile() {
+    if (!auth.token) return
+    setProfileLoading(true)
+    setProfileError(false)
+    try {
+      const user = await getUserProfile(auth.token)
+      const nextAuth = { user, token: auth.token }
+      localStorage.setItem(storageKey, JSON.stringify(nextAuth))
+      setAuth(nextAuth)
+    } catch (error) {
+      if (error.status === 401) logout()
+      else setProfileError(true)
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  useEffect(() => { refreshProfile() }, [auth.token])
 
   async function login(credentials) {
     const data = await loginUser(credentials)
@@ -34,10 +55,11 @@ export function AuthProvider({ children }) {
   function logout() {
     localStorage.removeItem(storageKey)
     setAuth({ user: null, token: null })
+    setProfileError(false)
   }
 
   return (
-    <AuthContext.Provider value={{ ...auth, isAuthenticated: Boolean(auth.user && auth.token), login, logout, register }}>
+    <AuthContext.Provider value={{ ...auth, isAuthenticated: Boolean(auth.user && auth.token), login, logout, profileError, profileLoading, refreshProfile, register }}>
       {children}
     </AuthContext.Provider>
   )

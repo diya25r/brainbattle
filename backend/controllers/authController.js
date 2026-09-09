@@ -5,7 +5,7 @@ import User from '../models/User.js'
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function toSafeUser(user) {
-  return { id: user._id.toString(), name: user.name, email: user.email, xp: user.xp, level: user.level }
+  return { id: user._id.toString(), name: user.name, email: user.email, xp: user.xp, level: user.level, role: user.role }
 }
 
 function createToken(userId) {
