@@ -329,6 +329,7 @@ async function seedAdmin() {
 }
 
 async function seed() {
+  if (!process.env.MONGO_URI) throw new Error('MONGO_URI must be configured before seeding questions.')
   await connectDatabase()
   const texts = questions.map(({ question: text }) => text)
   await Question.deleteMany({ question: { $regex: /^(Which study area|Which label best matches|What should a learner review|Which topic is intentionally|Which exact topic filter|For this question|Which named concept|Which topic name|Which focused area|Which topic must remain)/ } })
