@@ -16,6 +16,10 @@ const questions = [
   question('Java', 'Basics', 'Easy', 'Which symbol ends a Java statement?', [';', ':', '.', ','], ';'),
   question('Java', 'Basics', 'Easy', 'Which keyword declares a class?', ['class', 'object', 'define', 'struct'], 'class'),
   question('Java', 'OOP', 'Medium', 'Which OOP feature lets a child class reuse a parent class?', ['Inheritance', 'Encapsulation', 'Overloading', 'Casting'], 'Inheritance'),
+  question('Java', 'OOP', 'Medium', 'Which concept hides an object\'s internal details behind methods?', ['Encapsulation', 'Inheritance', 'Compilation', 'Indexing'], 'Encapsulation'),
+  question('Java', 'OOP', 'Medium', 'What is it called when one method name has different parameter lists?', ['Method overloading', 'Method hiding', 'Garbage collection', 'Serialization'], 'Method overloading'),
+  question('Java', 'OOP', 'Medium', 'Which keyword prevents a class from being inherited?', ['final', 'static', 'private', 'abstract'], 'final'),
+  question('Java', 'OOP', 'Medium', 'What does polymorphism allow an object reference to do?', ['Refer to different object types', 'Store only strings', 'Avoid constructors', 'Skip compilation'], 'Refer to different object types'),
   question('Java', 'Arrays', 'Hard', 'What is the first valid index of a Java array?', ['0', '1', '-1', 'It depends on the type'], '0'),
 
   question('DBMS', 'SQL', 'Easy', 'Which SQL command retrieves rows from a table?', ['SELECT', 'INSERT', 'UPDATE', 'DELETE'], 'SELECT'),

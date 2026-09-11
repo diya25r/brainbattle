@@ -4,7 +4,12 @@ import AuthPage from '../pages/AuthPage.jsx'
 import ProtectedRoute from '../components/ProtectedRoute.jsx'
 import Dashboard from '../pages/Dashboard.jsx'
 import BattleSetup from '../pages/BattleSetup.jsx'
-import BattleReady from '../pages/BattleReady.jsx'
+import QuizBattle from '../pages/QuizBattle.jsx'
+import BattleResult from '../pages/BattleResult.jsx'
+import BattleRoom from '../pages/BattleRoom.jsx'
+import History from '../pages/History.jsx'
+import Performance from '../pages/Performance.jsx'
+import Leaderboard from '../pages/Leaderboard.jsx'
 import PlaceholderPage from '../pages/PlaceholderPage.jsx'
 import AppLayout from './AppLayout.jsx'
 import './AppShell.css'
@@ -22,10 +27,13 @@ function AppShell() {
         <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route element={<Dashboard />} path="/dashboard" />
           <Route element={<BattleSetup />} path="/battle" />
-          <Route element={<BattleReady />} path="/battle/quiz" />
-          <Route element={<PlaceholderPage title="History" />} path="/history" />
-          <Route element={<PlaceholderPage title="Performance" />} path="/performance" />
-          <Route element={<PlaceholderPage title="Leaderboard" />} path="/leaderboard" />
+          <Route element={<QuizBattle />} path="/battle/:battleId/play" />
+          <Route element={<BattleRoom />} path="/battle/:battleId" />
+          <Route element={<BattleResult />} path="/battle/result/:battleId" />
+          <Route element={<BattleResult />} path="/battle/:battleId/result" />
+          <Route element={<History />} path="/history" />
+          <Route element={<Performance />} path="/performance" />
+          <Route element={<Leaderboard />} path="/leaderboard" />
           <Route element={<PlaceholderPage title="Profile" />} path="/profile" />
         </Route>
         <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="*" />
