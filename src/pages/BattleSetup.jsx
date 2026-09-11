@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { createMultiplayerBattle, joinMultiplayerBattleByCode } from '../services/battleService.js'
 import './BattleSetup.css'
 
-const subjectTopics = { Java: ['Basics', 'OOP', 'Arrays'], DBMS: ['SQL', 'Normalization', 'Keys'], 'Web Development': ['HTML', 'CSS', 'JavaScript'], Aptitude: ['Percentages', 'Ratios', 'Number Problems'] }
-const questionCounts = [5, 10, 15, 20]
+const subjectTopics = { Java: ['Basics', 'OOP', 'Arrays', 'Strings', 'Methods', 'Inheritance', 'Polymorphism', 'Exception Handling', 'Collections', 'Loops / Control Flow'], DBMS: ['DBMS Basics', 'SQL', 'Keys', 'Normalization', 'ER Model', 'Transactions', 'ACID', 'Joins', 'Indexing', 'Relational Concepts'], 'Web Development': ['HTML', 'CSS', 'JavaScript', 'DOM', 'HTTP', 'REST APIs', 'React', 'Node.js', 'Express', 'Web Concepts'], Aptitude: ['Percentages', 'Profit & Loss', 'Ratio & Proportion', 'Averages', 'Time & Work', 'Time, Speed & Distance', 'Simple & Compound Interest', 'Number System', 'Probability', 'Logical Reasoning'] }
+const questionCounts = [5, 10]
 const battleCodePattern = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/
 
 function BattleSetup() {

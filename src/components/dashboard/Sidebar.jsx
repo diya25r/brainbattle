@@ -6,7 +6,6 @@ const navigation = [
   ['Battle', '/battle'],
   ['History', '/history'],
   ['Performance', '/performance'],
-  ['Leaderboard', '/leaderboard'],
   ['Profile', '/profile'],
 ]
 

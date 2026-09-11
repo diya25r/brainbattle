@@ -3,10 +3,10 @@ import Question from '../models/Question.js'
 import BattleSubmission from '../models/BattleSubmission.js'
 
 export const subjectTopics = {
-  Java: ['Basics', 'OOP', 'Arrays'],
-  DBMS: ['SQL', 'Normalization', 'Keys'],
-  'Web Development': ['HTML', 'CSS', 'JavaScript'],
-  Aptitude: ['Percentages', 'Ratios', 'Number Problems'],
+  Java: ['Basics', 'OOP', 'Arrays', 'Strings', 'Methods', 'Inheritance', 'Polymorphism', 'Exception Handling', 'Collections', 'Loops / Control Flow'],
+  DBMS: ['DBMS Basics', 'SQL', 'Keys', 'Normalization', 'ER Model', 'Transactions', 'ACID', 'Joins', 'Indexing', 'Relational Concepts'],
+  'Web Development': ['HTML', 'CSS', 'JavaScript', 'DOM', 'HTTP', 'REST APIs', 'React', 'Node.js', 'Express', 'Web Concepts'],
+  Aptitude: ['Percentages', 'Profit & Loss', 'Ratio & Proportion', 'Averages', 'Time & Work', 'Time, Speed & Distance', 'Simple & Compound Interest', 'Number System', 'Probability', 'Logical Reasoning'],
 }
 
 const difficulties = ['Easy', 'Medium', 'Hard']

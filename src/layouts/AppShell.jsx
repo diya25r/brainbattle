@@ -9,8 +9,7 @@ import BattleResult from '../pages/BattleResult.jsx'
 import BattleRoom from '../pages/BattleRoom.jsx'
 import History from '../pages/History.jsx'
 import Performance from '../pages/Performance.jsx'
-import Leaderboard from '../pages/Leaderboard.jsx'
-import PlaceholderPage from '../pages/PlaceholderPage.jsx'
+import Profile from '../pages/Profile.jsx'
 import AppLayout from './AppLayout.jsx'
 import './AppShell.css'
 
@@ -33,8 +32,7 @@ function AppShell() {
           <Route element={<BattleResult />} path="/battle/:battleId/result" />
           <Route element={<History />} path="/history" />
           <Route element={<Performance />} path="/performance" />
-          <Route element={<Leaderboard />} path="/leaderboard" />
-          <Route element={<PlaceholderPage title="Profile" />} path="/profile" />
+          <Route element={<Profile />} path="/profile" />
         </Route>
         <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="*" />
       </Routes>

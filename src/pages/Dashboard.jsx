@@ -13,10 +13,10 @@ const subjects = [
 ]
 
 function Dashboard() {
-  const { profileError, profileLoading, user } = useAuth()
+  const { profileError, profileLoading, refreshProfile, user } = useAuth()
 
   if (profileLoading) return <p className="page-state">Loading your BrainBattle profile...</p>
-  if (profileError) return <p className="page-state">Unable to load your profile. Please try again.</p>
+  if (profileError) return <section className="insights-state"><h2>Dashboard unavailable</h2><p>Unable to load your profile. Please check that the backend is running.</p><button onClick={refreshProfile} type="button">TRY AGAIN</button></section>
 
   return (
     <>

@@ -13,4 +13,3 @@ async function userRequest(token, request) {
 
 export function getBattleHistory(token) { return userRequest(token, (config) => api.get('/battles/history', config)) }
 export function getPerformance(token) { return userRequest(token, (config) => api.get('/users/performance', config)) }
-export function getLeaderboard(token) { return userRequest(token, (config) => api.get('/users/leaderboard', config)) }

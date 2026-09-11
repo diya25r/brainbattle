@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useSocket } from '../context/SocketContext.jsx'
@@ -21,6 +21,7 @@ function QuizBattle() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [liveState, setLiveState] = useState(null)
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const submissionStarted = useRef(false)
 
   const loadBattle = useCallback(async () => {
     try {
@@ -77,6 +78,8 @@ function QuizBattle() {
   if (hasSubmitted) return <section className="quiz-empty"><p className="page-header__label">BATTLE</p><h1>You finished!</h1><p>Your answers have been submitted.</p><p>Waiting for your opponent to finish...</p><small>Opponent: {opponentSubmitted ? 'Finished' : opponentConnected ? 'Answering...' : 'Disconnected'}</small></section>
 
   async function submit() {
+    if (submissionStarted.current || isSubmitting) return
+    submissionStarted.current = true
     setIsSubmitting(true); setError('')
     try {
       let status = 'active'
@@ -90,7 +93,7 @@ function QuizBattle() {
       setHasSubmitted(true)
       if (status === 'completed') navigate(`/battle/result/${battleId}`, { replace: true })
       else await loadBattle()
-    } catch (requestError) { setError(requestError.message); setShowConfirmation(false) } finally { setIsSubmitting(false) }
+    } catch (requestError) { submissionStarted.current = false; setError(requestError.message); setShowConfirmation(false) } finally { setIsSubmitting(false) }
   }
 
   return <section className="quiz-battle"><header className="quiz-battle__header"><div><p className="page-header__label">BATTLE</p><h1>{battle.subject}</h1><p>{battle.topic} <span>•</span> {battle.difficulty}</p></div><div className="quiz-battle__progress-label">Question {currentIndex + 1} of {questions.length}<small>YOU VS {opponent.name} · {opponentSubmitted ? 'SUBMITTED' : opponentConnected ? 'CONNECTED' : 'DISCONNECTED'}</small></div></header>
