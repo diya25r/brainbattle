@@ -4,20 +4,20 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { createMultiplayerBattle, joinMultiplayerBattleByCode } from '../services/battleService.js'
 import './BattleSetup.css'
 
-const subjectTopics = { Java: ['Basics', 'OOP', 'Arrays', 'Strings', 'Methods', 'Inheritance', 'Polymorphism', 'Exception Handling', 'Collections', 'Loops / Control Flow'], DBMS: ['DBMS Basics', 'SQL', 'Keys', 'Normalization', 'ER Model', 'Transactions', 'ACID', 'Joins', 'Indexing', 'Relational Concepts'], 'Web Development': ['HTML', 'CSS', 'JavaScript', 'DOM', 'HTTP', 'REST APIs', 'React', 'Node.js', 'Express', 'Web Concepts'], Aptitude: ['Percentages', 'Profit & Loss', 'Ratio & Proportion', 'Averages', 'Time & Work', 'Time, Speed & Distance', 'Simple & Compound Interest', 'Number System', 'Probability', 'Logical Reasoning'] }
+const subjectTopics = { Java: ['Basics', 'OOP', 'Arrays', 'Strings', 'Collections'], DBMS: ['SQL', 'Keys', 'Normalization', 'Transactions', 'Joins'], 'Web Development': ['HTML', 'CSS', 'JavaScript', 'HTTP', 'REST APIs'], Aptitude: ['Percentages', 'Profit & Loss', 'Ratio', 'Time & Work', 'Probability'] }
 const questionCounts = [5, 10]
 const battleCodePattern = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/
 
 function BattleSetup() {
   const navigate = useNavigate()
   const { token } = useAuth()
-  const [setup, setSetup] = useState({ subject: '', topic: '', difficulty: '', questionCount: '' })
+  const [setup, setSetup] = useState({ subject: '', topic: '', questionCount: '' })
   const [battleCode, setBattleCode] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
   const topics = useMemo(() => subjectTopics[setup.subject] || [], [setup.subject])
-  const isValid = Boolean(setup.subject && setup.topic && setup.difficulty && setup.questionCount)
+  const isValid = Boolean(setup.subject && setup.topic && setup.questionCount)
 
   function updateSetup(event) {
     const { name, value } = event.target
@@ -51,7 +51,6 @@ function BattleSetup() {
       <form className="battle-setup" onSubmit={createBattle}><div className="battle-setup__grid">
         <label className="battle-field">SUBJECT<select name="subject" onChange={updateSetup} value={setup.subject}><option value="">Select a subject</option>{Object.keys(subjectTopics).map((subject) => <option key={subject}>{subject}</option>)}</select></label>
         <label className="battle-field">TOPIC<select disabled={!setup.subject} name="topic" onChange={updateSetup} value={setup.topic}><option value="">Select a topic</option>{topics.map((topic) => <option key={topic}>{topic}</option>)}</select></label>
-        <label className="battle-field">DIFFICULTY<select name="difficulty" onChange={updateSetup} value={setup.difficulty}><option value="">Select difficulty</option>{['Easy', 'Medium', 'Hard'].map((difficulty) => <option key={difficulty}>{difficulty}</option>)}</select></label>
         <label className="battle-field">NUMBER OF QUESTIONS<select name="questionCount" onChange={updateSetup} value={setup.questionCount}><option value="">Select a number</option>{questionCounts.map((count) => <option key={count} value={count}>{count}</option>)}</select></label>
       </div>{error && <p className="battle-setup__error" role="alert">{error}</p>}<button className="battle-setup__button" disabled={!isValid || isLoading} type="submit">{isLoading ? 'CREATING BATTLE...' : 'CREATE BATTLE'}</button></form>
     </section>
