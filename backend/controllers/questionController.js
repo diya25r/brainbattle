@@ -1,0 +1,124 @@
+import mongoose from 'mongoose'
+import Question from '../models/Question.js'
+import BattleSubmission from '../models/BattleSubmission.js'
+
+export const subjectTopics = {
+  Java: ['Basics', 'OOP', 'Arrays', 'Strings', 'Methods', 'Inheritance', 'Polymorphism', 'Exception Handling', 'Collections', 'Loops / Control Flow'],
+  DBMS: ['DBMS Basics', 'SQL', 'Keys', 'Normalization', 'ER Model', 'Transactions', 'ACID', 'Joins', 'Indexing', 'Relational Concepts'],
+  'Web Development': ['HTML', 'CSS', 'JavaScript', 'DOM', 'HTTP', 'REST APIs', 'React', 'Node.js', 'Express', 'Web Concepts'],
+  Aptitude: ['Percentages', 'Profit & Loss', 'Ratio & Proportion', 'Averages', 'Time & Work', 'Time, Speed & Distance', 'Simple & Compound Interest', 'Number System', 'Probability', 'Logical Reasoning'],
+}
+
+const battleFields = '_id subject topic question options'
+
+function validateQuestionInput(body) {
+  const { subject, topic, question, options, correctAnswer } = body
+  if (!subjectTopics[subject]) return 'Please provide a valid subject.'
+  if (!subjectTopics[subject].includes(topic)) return 'Please provide a topic valid for the selected subject.'
+  if (!question?.trim()) return 'Question text is required.'
+  if (!Array.isArray(options) || options.length !== 4 || options.some((option) => typeof option !== 'string' || !option.trim())) return 'Exactly four non-empty options are required.'
+  if (!correctAnswer?.trim() || !options.includes(correctAnswer)) return 'Correct answer must match one of the options.'
+  return null
+}
+
+export async function createQuestion(request, response, next) {
+  try {
+    const validationError = validateQuestionInput(request.body)
+    if (validationError) return response.status(400).json({ success: false, message: validationError })
+    const { subject, topic, question: questionText, options, correctAnswer } = request.body
+    const question = await Question.create({ subject, topic, question: questionText, options, correctAnswer })
+    return response.status(201).json({ success: true, question })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function getQuestions(_request, response, next) {
+  try {
+    const questions = await Question.find().sort({ subject: 1, topic: 1, createdAt: -1 })
+    return response.status(200).json({ success: true, questions })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function updateQuestion(request, response, next) {
+  try {
+    if (!mongoose.isObjectIdOrHexString(request.params.id)) return response.status(400).json({ success: false, message: 'Invalid question id.' })
+    const validationError = validateQuestionInput(request.body)
+    if (validationError) return response.status(400).json({ success: false, message: validationError })
+    const { subject, topic, question: questionText, options, correctAnswer } = request.body
+    const question = await Question.findByIdAndUpdate(request.params.id, { subject, topic, question: questionText, options, correctAnswer }, { returnDocument: 'after', runValidators: true })
+    if (!question) return response.status(404).json({ success: false, message: 'Question not found.' })
+    return response.status(200).json({ success: true, question })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function deleteQuestion(request, response, next) {
+  try {
+    if (!mongoose.isObjectIdOrHexString(request.params.id)) return response.status(400).json({ success: false, message: 'Invalid question id.' })
+    const question = await Question.findByIdAndDelete(request.params.id)
+    if (!question) return response.status(404).json({ success: false, message: 'Question not found.' })
+    return response.status(200).json({ success: true, message: 'Question deleted.' })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function getBattleQuestions(request, response, next) {
+  try {
+    const { subject, topic, limit: limitValue } = request.query
+    const limit = Number(limitValue)
+    if (!subjectTopics[subject] || !subjectTopics[subject].includes(topic) || !Number.isInteger(limit) || limit < 1 || limit > 20) {
+      return response.status(400).json({ success: false, message: 'Choose a valid subject, topic, and question limit between 1 and 20.' })
+    }
+
+    const filter = { subject, topic }
+    const available = await Question.countDocuments(filter)
+    if (available < limit) {
+      return response.status(422).json({ success: false, message: `Only ${available} matching questions are available. Please choose another setup or a smaller number.`, available })
+    }
+
+    const questions = await Question.aggregate([
+      { $match: filter },
+      { $sample: { size: limit } },
+      { $project: { subject: 1, topic: 1, question: 1, options: 1 } },
+    ])
+    return response.status(200).json({ success: true, questions })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function submitBattle(request, response, next) {
+  try {
+    const { questions } = request.body
+    if (!Array.isArray(questions) || questions.length < 1 || questions.length > 20) {
+      return response.status(400).json({ success: false, message: 'Submit between 1 and 20 answers.' })
+    }
+
+    const ids = questions.map(({ questionId }) => questionId)
+    if (ids.some((id) => !mongoose.isObjectIdOrHexString(id)) || new Set(ids).size !== ids.length) {
+      return response.status(400).json({ success: false, message: 'Each submitted question must have one unique valid id.' })
+    }
+    if (questions.some(({ answer }) => typeof answer !== 'string' || !answer.trim())) {
+      return response.status(400).json({ success: false, message: 'Each submitted question needs an answer.' })
+    }
+
+    const storedQuestions = await Question.find({ _id: { $in: ids } }).select('_id options')
+    if (storedQuestions.length !== ids.length) return response.status(400).json({ success: false, message: 'One or more submitted questions no longer exist.' })
+    const optionsById = new Map(storedQuestions.map((question) => [question._id.toString(), question.options]))
+    if (questions.some(({ questionId, answer }) => !optionsById.get(questionId)?.includes(answer))) {
+      return response.status(400).json({ success: false, message: 'One or more submitted answers are invalid.' })
+    }
+
+    const submission = await BattleSubmission.create({ user: request.user._id, answers: questions })
+    return response.status(201).json({ success: true, submissionId: submission._id.toString(), message: 'Battle submitted successfully.' })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export { battleFields }
