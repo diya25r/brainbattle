@@ -1,4 +1,8 @@
+import dns from 'node:dns'
 import mongoose from 'mongoose'
+
+// Use a public DNS resolver for MongoDB Atlas SRV lookups before connecting.
+dns.setServers(['8.8.8.8'])
 
 async function connectDatabase() {
   const mongoUri = process.env.MONGO_URI
