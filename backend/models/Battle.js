@@ -14,7 +14,6 @@ const battleSchema = new mongoose.Schema({
   questions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true }],
   subject: { type: String, required: true },
   topic: { type: String, required: true },
-  difficulty: { type: String, required: true, enum: ['Easy', 'Medium', 'Hard'] },
   questionCount: { type: Number, required: true, min: 1, max: 20 },
   status: { type: String, enum: ['waiting', 'active', 'completed'], default: 'waiting' },
   creatorAnswers: { type: [answerSchema], default: [] },

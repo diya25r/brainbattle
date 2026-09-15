@@ -9,14 +9,12 @@ export const subjectTopics = {
   Aptitude: ['Percentages', 'Profit & Loss', 'Ratio & Proportion', 'Averages', 'Time & Work', 'Time, Speed & Distance', 'Simple & Compound Interest', 'Number System', 'Probability', 'Logical Reasoning'],
 }
 
-const difficulties = ['Easy', 'Medium', 'Hard']
-const battleFields = '_id subject topic difficulty question options'
+const battleFields = '_id subject topic question options'
 
 function validateQuestionInput(body) {
-  const { subject, topic, difficulty, question, options, correctAnswer } = body
+  const { subject, topic, question, options, correctAnswer } = body
   if (!subjectTopics[subject]) return 'Please provide a valid subject.'
   if (!subjectTopics[subject].includes(topic)) return 'Please provide a topic valid for the selected subject.'
-  if (!difficulties.includes(difficulty)) return 'Please provide a valid difficulty.'
   if (!question?.trim()) return 'Question text is required.'
   if (!Array.isArray(options) || options.length !== 4 || options.some((option) => typeof option !== 'string' || !option.trim())) return 'Exactly four non-empty options are required.'
   if (!correctAnswer?.trim() || !options.includes(correctAnswer)) return 'Correct answer must match one of the options.'
@@ -27,7 +25,8 @@ export async function createQuestion(request, response, next) {
   try {
     const validationError = validateQuestionInput(request.body)
     if (validationError) return response.status(400).json({ success: false, message: validationError })
-    const question = await Question.create(request.body)
+    const { subject, topic, question: questionText, options, correctAnswer } = request.body
+    const question = await Question.create({ subject, topic, question: questionText, options, correctAnswer })
     return response.status(201).json({ success: true, question })
   } catch (error) {
     return next(error)
@@ -48,7 +47,8 @@ export async function updateQuestion(request, response, next) {
     if (!mongoose.isObjectIdOrHexString(request.params.id)) return response.status(400).json({ success: false, message: 'Invalid question id.' })
     const validationError = validateQuestionInput(request.body)
     if (validationError) return response.status(400).json({ success: false, message: validationError })
-    const question = await Question.findByIdAndUpdate(request.params.id, request.body, { returnDocument: 'after', runValidators: true })
+    const { subject, topic, question: questionText, options, correctAnswer } = request.body
+    const question = await Question.findByIdAndUpdate(request.params.id, { subject, topic, question: questionText, options, correctAnswer }, { returnDocument: 'after', runValidators: true })
     if (!question) return response.status(404).json({ success: false, message: 'Question not found.' })
     return response.status(200).json({ success: true, question })
   } catch (error) {
@@ -69,13 +69,13 @@ export async function deleteQuestion(request, response, next) {
 
 export async function getBattleQuestions(request, response, next) {
   try {
-    const { subject, topic, difficulty, limit: limitValue } = request.query
+    const { subject, topic, limit: limitValue } = request.query
     const limit = Number(limitValue)
-    if (!subjectTopics[subject] || !subjectTopics[subject].includes(topic) || !difficulties.includes(difficulty) || !Number.isInteger(limit) || limit < 1 || limit > 20) {
-      return response.status(400).json({ success: false, message: 'Choose a valid subject, topic, difficulty, and question limit between 1 and 20.' })
+    if (!subjectTopics[subject] || !subjectTopics[subject].includes(topic) || !Number.isInteger(limit) || limit < 1 || limit > 20) {
+      return response.status(400).json({ success: false, message: 'Choose a valid subject, topic, and question limit between 1 and 20.' })
     }
 
-    const filter = { subject, topic, difficulty }
+    const filter = { subject, topic }
     const available = await Question.countDocuments(filter)
     if (available < limit) {
       return response.status(422).json({ success: false, message: `Only ${available} matching questions are available. Please choose another setup or a smaller number.`, available })
@@ -84,7 +84,7 @@ export async function getBattleQuestions(request, response, next) {
     const questions = await Question.aggregate([
       { $match: filter },
       { $sample: { size: limit } },
-      { $project: { subject: 1, topic: 1, difficulty: 1, question: 1, options: 1 } },
+      { $project: { subject: 1, topic: 1, question: 1, options: 1 } },
     ])
     return response.status(200).json({ success: true, questions })
   } catch (error) {

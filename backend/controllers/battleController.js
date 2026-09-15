@@ -7,8 +7,7 @@ import { subjectTopics } from './questionController.js'
 import { emitBattleCompleted, emitBattleStarted, emitBattleState, emitPlayerSubmitted } from '../socket/battleSocket.js'
 import { accuracyFor, levelForXp, scoreAnswers, xpForResult } from '../utils/scoring.js'
 
-const difficulties = ['Easy', 'Medium', 'Hard']
-const safeQuestionFields = 'subject topic difficulty question options'
+const safeQuestionFields = 'subject topic question options'
 const safeUserFields = 'name'
 const battleCodeAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -21,9 +20,9 @@ function normalizeBattleCode(value) {
   return typeof value === 'string' ? value.trim().toUpperCase() : ''
 }
 
-function validateSetup({ subject, topic, difficulty, questionCount }) {
+function validateSetup({ subject, topic, questionCount }) {
   const count = Number(questionCount)
-  if (!subjectTopics[subject] || !subjectTopics[subject].includes(topic) || !difficulties.includes(difficulty) || !Number.isInteger(count) || count < 1 || count > 20) return null
+  if (!subjectTopics[subject] || !subjectTopics[subject].includes(topic) || !Number.isInteger(count) || count < 1 || count > 20) return null
   return count
 }
 
@@ -38,13 +37,13 @@ function participant(user) {
 function safeBattle(battle, userId, includeQuestions = false) {
   const result = {
     _id: battle._id.toString(), creator: participant(battle.creator), opponent: participant(battle.opponent),
-    subject: battle.subject, topic: battle.topic, difficulty: battle.difficulty, questionCount: battle.questionCount,
+    subject: battle.subject, topic: battle.topic, questionCount: battle.questionCount,
     status: battle.status, createdAt: battle.createdAt, updatedAt: battle.updatedAt,
     creatorSubmitted: Boolean(battle.creatorSubmittedAt), opponentSubmitted: Boolean(battle.opponentSubmittedAt),
     creatorAnsweredCount: battle.creatorAnswers.length, opponentAnsweredCount: battle.opponentAnswers.length,
   }
   if (isParticipant(battle, userId)) result.battleCode = battle.battleCode
-  if (includeQuestions) result.questions = battle.questions.map((question) => ({ _id: question._id.toString(), subject: question.subject, topic: question.topic, difficulty: question.difficulty, question: question.question, options: question.options }))
+  if (includeQuestions) result.questions = battle.questions.map((question) => ({ _id: question._id.toString(), subject: question.subject, topic: question.topic, question: question.question, options: question.options }))
   if (battle.creator._id.toString() === userId) result.myAnswers = battle.creatorAnswers
   if (battle.opponent?._id?.toString() === userId) result.myAnswers = battle.opponentAnswers
   return result
@@ -98,16 +97,16 @@ async function loadBattle(id, populateQuestions = false) {
 export async function createBattle(request, response, next) {
   try {
     const count = validateSetup(request.body)
-    if (!count) return response.status(400).json({ success: false, message: 'Choose a valid subject, topic, difficulty, and question count.' })
-    const { subject, topic, difficulty } = request.body
-    const filter = { subject, topic, difficulty }
+    if (!count) return response.status(400).json({ success: false, message: 'Choose a valid subject, topic, and question count.' })
+    const { subject, topic } = request.body
+    const filter = { subject, topic }
     const available = await Question.countDocuments(filter)
     if (available < count) return response.status(422).json({ success: false, message: `Only ${available} matching questions are available for this setup.`, available })
     const questions = await Question.aggregate([{ $match: filter }, { $sample: { size: count } }, { $project: { _id: 1 } }])
     let battle
     for (let attempt = 0; attempt < 5; attempt += 1) {
       try {
-        battle = await Battle.create({ battleCode: generateBattleCode(), creator: request.user._id, questions: questions.map(({ _id }) => _id), subject, topic, difficulty, questionCount: count })
+        battle = await Battle.create({ battleCode: generateBattleCode(), creator: request.user._id, questions: questions.map(({ _id }) => _id), subject, topic, questionCount: count })
         break
       } catch (error) {
         if (error?.code !== 11000 || attempt === 4) throw error
@@ -186,7 +185,7 @@ export async function getBattleHistory(request, response, next) {
       const opponentScore = isCreator ? battle.opponentScore : battle.creatorScore
       const result = !battle.winner ? 'DRAW' : battle.winner.equals(userId) ? 'WIN' : 'LOSS'
       const opponent = isCreator ? battle.opponent : battle.creator
-      return { _id: battle._id.toString(), battleCode: battle.battleCode, subject: battle.subject, topic: battle.topic, difficulty: battle.difficulty, questionCount: battle.questionCount, opponent: participant(opponent), myScore, opponentScore, result, status: battle.status, createdAt: battle.createdAt, completedAt: battle.completedAt }
+      return { _id: battle._id.toString(), battleCode: battle.battleCode, subject: battle.subject, topic: battle.topic, questionCount: battle.questionCount, opponent: participant(opponent), myScore, opponentScore, result, status: battle.status, createdAt: battle.createdAt, completedAt: battle.completedAt }
     })
     return response.json({ success: true, battles: history })
   } catch (error) { return next(error) }

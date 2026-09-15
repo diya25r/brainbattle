@@ -20,7 +20,7 @@ function safeState(battle, io) {
     battleId, status: battle.status,
     creator: { id: creatorId, name: battle.creator.name, connected: participantConnected(io, battleId, creatorId) },
     opponent: battle.opponent ? { id: opponentId, name: battle.opponent.name, connected: participantConnected(io, battleId, opponentId) } : null,
-    subject: battle.subject, topic: battle.topic, difficulty: battle.difficulty, questionCount: battle.questionCount,
+    subject: battle.subject, topic: battle.topic, questionCount: battle.questionCount,
     creatorSubmitted: Boolean(battle.creatorSubmittedAt), opponentSubmitted: Boolean(battle.opponentSubmittedAt),
     creatorAnsweredCount: battle.creatorAnswers.length, opponentAnsweredCount: battle.opponentAnswers.length,
   }
