@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AuthField from '../components/AuthField.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 import './AuthPage.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -10,16 +12,20 @@ function getErrors(mode, values) {
   if (!values.email.trim()) errors.email = 'Please enter your email address.'
   else if (!emailPattern.test(values.email)) errors.email = 'Enter a valid email address.'
   if (!values.password) errors.password = 'Please enter your password.'
+  else if (values.password.length < 6) errors.password = 'Password must be at least 6 characters long.'
   if (mode === 'signup' && values.confirmPassword !== values.password) {
     errors.confirmPassword = 'Passwords do not match.'
   }
   return errors
 }
 
-function AuthPage({ mode, onModeChange }) {
+function AuthPage({ mode }) {
   const [values, setValues] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState({})
   const [notice, setNotice] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { login, register } = useAuth()
+  const navigate = useNavigate()
   const isLogin = mode === 'login'
 
   function handleChange(event) {
@@ -29,12 +35,20 @@ function AuthPage({ mode, onModeChange }) {
     setNotice('')
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const nextErrors = getErrors(mode, values)
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length === 0) {
-      setNotice('Authentication will be connected in a later phase. No account changes were made.')
+    if (Object.keys(nextErrors).length > 0) return
+
+    setIsSubmitting(true)
+    try {
+      if (isLogin) await login({ email: values.email, password: values.password })
+      else await register({ name: values.name, email: values.email, password: values.password })
+    } catch (error) {
+      setNotice(error.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -42,7 +56,7 @@ function AuthPage({ mode, onModeChange }) {
     setValues({ name: '', email: '', password: '', confirmPassword: '' })
     setErrors({})
     setNotice('')
-    onModeChange(nextMode)
+    navigate(nextMode === 'signup' ? '/signup' : '/login')
   }
 
   return (
@@ -63,7 +77,7 @@ function AuthPage({ mode, onModeChange }) {
 
           {isLogin && <button className="auth-card__forgot" type="button">Forgot password?</button>}
           {notice && <p className="auth-card__notice" role="status">{notice}</p>}
-          <button className="auth-card__submit" type="submit">{isLogin ? 'LOGIN' : 'CREATE ACCOUNT'}</button>
+          <button className="auth-card__submit" disabled={isSubmitting} type="submit">{isSubmitting ? 'PLEASE WAIT...' : isLogin ? 'LOGIN' : 'CREATE ACCOUNT'}</button>
         </form>
 
         <p className="auth-card__switch">

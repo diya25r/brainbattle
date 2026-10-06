@@ -1,6 +1,5 @@
 .app-shell {
-  isolation: isolate; position: relative; display: grid; min-height: 100vh;
-  place-items: center; overflow: hidden;
+  isolation: isolate; position: relative; min-height: 100vh; overflow-x: hidden;
   background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, .12), transparent 36%), var(--bb-bg);
 }
 .app-shell__glow { position: absolute; z-index: -1; width: 28rem; height: 28rem; border-radius: 50%; filter: blur(90px); opacity: .18; }
